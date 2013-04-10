@@ -1,0 +1,11 @@
+#!/bin/bash
+# The logic to start up your application should be put in this
+# script. The application will work only if it binds to
+# $OPENSHIFT_INTERNAL_IP:8080
+
+echo 'starting processes'
+
+export PYTHONPATH="$OPENSHIFT_DATA_DIR/pylibs/supervisor:$OPENSHIFT_DATA_DIR/pylibs/meld3:$OPENSHIFT_DATA_DIR/pylibs"
+export LD_LIBRARY_PATH=$OPENSHIFT_DATA_DIR/lib
+python $OPENSHIFT_DATA_DIR/pylibs/supervisor/supervisord.py -c $OPENSHIFT_DATA_DIR/etc/supervisor.ini
+

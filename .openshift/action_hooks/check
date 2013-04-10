@@ -1,0 +1,12 @@
+#!/bin/bash
+
+BASE=$OPENSHIFT_HOMEDIR/diy-0.1
+
+# check that supervisor is up
+if ! [ -e $BASE/run/supervisord.sock ]; then
+    echo "supervisor is not running"
+    exit 0
+fi
+
+export PYTHONPATH="$OPENSHIFT_DATA_DIR/pylibs/supervisor:$OPENSHIFT_DATA_DIR/pylibs/meld3:$OPENSHIFT_DATA_DIR/pylibs"
+python $OPENSHIFT_DATA_DIR/pylibs/supervisor/supervisorctl.py -c $OPENSHIFT_DATA_DIR/etc/supervisor.ini status

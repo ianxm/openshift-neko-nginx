@@ -1,0 +1,187 @@
+#!/bin/bash
+# This is a simple script and will be executed on your CI system if 
+# available.  Otherwise it will execute while your application is stopped
+# before the build step.  This script gets executed directly, so it
+# could be python, php, ruby, etc.
+
+set -e
+
+BASE=$OPENSHIFT_HOMEDIR/diy-0.1
+DATA=$BASE/data
+REPO=$BASE/repo
+
+# install supervisord, nginx, nekovm the first time
+if [ ! -d $DATA/bin ]; then
+
+    echo ""
+    echo "starting one time dependency installation."
+    echo "this may take a while."
+    echo ""
+
+    cd $DATA
+    mkdir bin etc lib pylibs sbin tmp
+
+
+    echo ""
+    echo "installing supervisord"
+    echo ""
+
+    cd $DATA/tmp
+    URL="http://www.plope.com/software/meld3/meld3-0.6.5.tar.gz"
+    curl --silent --max-time 60 --location "$URL" | tar xz
+    mv meld3-0.6.5/meld3 ../pylibs
+    rm -rf meld3-0.6.5
+    URL="http://effbot.org/media/downloads/elementtree-1.2.6-20050316.tar.gz"
+    curl --silent --max-time 60 --location "$URL" | tar xz
+    mv elementtree-1.2.6-20050316/elementtree ../pylibs
+    rm -rf elementtree-1.2.6-20050316
+    URL="https://pypi.python.org/packages/source/s/supervisor/supervisor-3.0b1.tar.gz"
+    curl --silent --max-time 60 --location "$URL" | tar xz
+    mv supervisor-3.0b1/supervisor ../pylibs
+    rm -rf supervisor-3.0b1
+
+
+    echo ""
+    echo "installing nekovm"
+    echo ""
+
+    cd $DATA/tmp
+    # URL="http://nekovm.org/_media/neko-1.8.2-linux.tar.gz"
+    URL="http://nekovm.org/_media/neko-1.8.2-linux64.tar.gz"
+    curl --silent --max-time 60 --location "$URL" | tar xz
+    # mv neko-1.8.2-linux/neko neko-1.8.2-linux/nekotools ../bin
+    # mv neko-1.8.2-linux/*.ndll neko-1.8.2-linux/*.so ../lib
+    mv neko-1.8.2-linux64/neko neko-1.8.2-linux64/nekotools ../bin
+    mv neko-1.8.2-linux64/*.ndll neko-1.8.2-linux64/*.so ../lib
+    rm -rf neko-1.8.2-linux64
+
+
+    echo ""
+    echo "installing hxfcgi"
+    echo ""
+
+    cd $DATA/tmp
+    URL="http://lib.haxe.org/files/hxfcgi-0,1,2.zip"
+    mkdir hxfcgi
+    cd hxfcgi
+    curl --silent --max-time 60 --location "$URL" > hxfcgi.zip
+    unzip hxfcgi.zip
+    # mv ndll/Linux/hxfcgi.ndll ../../lib
+    # mv ndll/Linux/nekoapi.ndll ../../lib
+    mv ndll/Linux64/hxfcgi.ndll ../../lib
+    mv ndll/Linux64/nekoapi.ndll ../../lib
+    cd ..
+    rm -rf hxfcgi
+
+    echo ""
+    echo "installing libfcgi"
+    echo ""
+
+    cd $DATA/tmp
+    URL="ftp://ftp.muug.mb.ca/mirror/fedora/epel/5/SRPMS/fcgi-2.4.0-12.el5.src.rpm"
+    curl --silent --max-time 60 --location "$URL" > fcgi-2.4.0-12.el5.src.rpm
+    rpm2cpio fcgi-2.4.0-12.el5.src.rpm | cpio -idmv
+    tar zxf fcgi-2.4.0.tar.gz
+    cd fcgi-2.4.0
+    ./configure --prefix=$DATA
+    patch libfcgi/fcgio.cpp < ../fcgi-2.4.0-gcc44_fixes.patch
+    make && make install
+    cd ..
+
+
+    echo ""
+    echo "installing libgc"
+    echo ""
+
+    cd $DATA/tmp
+    URL="https://launchpad.net/libgc/main/7.2d/+download/gc-7.2d.tar.gz"
+    curl --silent --max-time 60 --location "$URL" | tar xz
+    cd gc-7.2
+    ./configure --prefix=$DATA && make && make install
+    cd ..
+    rm -rf gc-7.2
+
+
+    echo ""
+    echo "installing libpcre"
+    echo ""
+
+    cd $DATA/tmp
+    URL="ftp://ftp.csx.cam.ac.uk/pub/software/programming/pcre/pcre-8.21.tar.bz2"
+    curl --silent --max-time 60 --location "$URL" | tar xj
+    cd pcre-8.21
+    ./configure --prefix=$DATA && make && make install
+    cd ..
+    ln -s ../lib/libpcre.so.0 ../lib/libpcre.so.3
+    # dont delete it so nginx can link against it
+    # rm -rf pcre-8.21
+
+
+    echo ""
+    echo "installing sqlite3"
+    echo ""
+
+    cd $DATA/tmp
+    URL="http://www.sqlite.org/2013/sqlite-autoconf-3071601.tar.gz"
+    curl --silent --max-time 60 --location "$URL" | tar xz
+    cd sqlite-autoconf-3071601
+    ./configure --prefix=$DATA && make && make install
+    cd ..
+    rm -rf sqlite-autoconf-3071601
+
+
+    echo ""
+    echo "installing nginx"
+    echo ""
+
+    cd $DATA/tmp
+    URL="http://nginx.org/download/nginx-1.2.8.tar.gz"
+    curl --silent --max-time 60 --location "$URL" | tar xz
+    cd nginx-1.2.8
+    ./configure --prefix=$DATA \
+                --with-pcre=$DATA/tmp/pcre-8.21 && make
+    cd ..
+    mv nginx-1.2.8/objs/nginx ../sbin
+    rm -rf nginx-1.2.8
+
+
+    # echo ""
+    # echo "installing openssl"
+    # echo ""
+
+    # cd $DATA/tmp
+    # URL="http://www.openssl.org/source/openssl-1.0.1e.tar.gz"
+    # curl --silent --max-time 60 --location "$URL" | tar xz
+    # cd openssl-1.0.1e
+    # ./config --prefix=$DATA && make build-shared
+    # cd ..
+    # mv openssl-1.0.1e/libcrypto.so* ../lib/
+    # rm -rf openssl-1.0.1e
+
+    cd $DATA
+    rm -rf tmp
+
+    echo ""
+    echo "done installing dependencies"
+    echo ""
+fi
+
+
+echo ""
+echo "preparing config files"
+echo ""
+
+cp $REPO/etc/* $BASE/data/etc
+
+INTERNAL_IP="$OPENSHIFT_INTERNAL_IP"
+WWW_PORT="8080"
+
+# escape paths for use in sed
+BASE_STR=`echo "${BASE//\//\/}"`
+
+# modify them
+sed -e "s/\${BASE_DIR}/$BASE_STR/g" "$BASE/data/etc/supervisor.ini.base" > "$BASE/data/etc/supervisor.ini"
+
+sed -e "s/\${BASE_DIR}/$BASE_STR/g" \
+    -e "s/\${INTERNAL_IP}/$INTERNAL_IP/g" "$BASE/data/etc/nginx.conf.base" > "$BASE/data/etc/nginx.conf"
+

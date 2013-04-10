@@ -1,0 +1,52 @@
+worker_processes  1;
+
+# dont daemonize so supervisord can manage it
+daemon off;
+
+pid        ${BASE_DIR}/run/nginx.pid;
+error_log  ${BASE_DIR}/logs/error.log;
+
+events {
+    worker_connections  1024;
+}
+
+http {
+    include       mime.types;
+    default_type  application/octet-stream;
+    sendfile           on;
+    keepalive_timeout  65;
+
+    server {
+        # bind to internal ip
+        listen       ${INTERNAL_IP}:8080;
+
+        # send "/hello" to the neko module
+        rewrite ^/hello$ /index.fcgi break;
+
+        location / {
+            root   ${BASE_DIR}/repo/www;
+            index  index.html index.fcgi;
+        }
+
+        # redirect server error pages to the static page /50x.html
+        error_page   500 502 503 504  /error.html;
+        location = /error.html {
+            root   ${BASE_DIR}/repo/www;
+        }
+
+        # make the fastcgi call
+        location ~ \.fcgi$ {
+           root           ${BASE_DIR}/repo/www;
+           fastcgi_pass   unix:${BASE_DIR}/run/hello.sock;
+           fastcgi_index  index.fcgi;
+           include        fastcgi_params;
+        }
+    }
+
+    # put temp dirs in tmp
+    client_body_temp_path ${BASE_DIR}/tmp/scgi;
+    fastcgi_temp_path ${BASE_DIR}/tmp/fastcgi;
+    proxy_temp_path ${BASE_DIR}/tmp/proxy;
+    scgi_temp_path ${BASE_DIR}/tmp/scgi;
+    uwsgi_temp_path ${BASE_DIR}/tmp/wscgi;
+}
