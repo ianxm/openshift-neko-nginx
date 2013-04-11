@@ -3,3 +3,16 @@
 # available.  Otherwise it will execute while your application is stopped
 # before the deploy step.  This script gets executed directly, so it
 # could be python, php, ruby, etc.
+
+BASE=$OPENSHIFT_HOMEDIR/diy-0.1
+DATA=$BASE/data
+REPO=$BASE/repo
+
+echo ""
+echo "link the fcgi"
+echo ""
+
+export LD_LIBRARY_PATH=$DATA/lib
+export NEKOPATH=$DATA/bin
+$DATA/bin/nekotools boot $REPO/src/hello.n
+mv $REPO/src/hello $REPO/www/index.fcgi

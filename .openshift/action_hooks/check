@@ -1,7 +1,4 @@
 #!/bin/bash
-# The logic to stop your application should be put in this script.
-
-echo 'stopping processes'
 
 BASE=$OPENSHIFT_HOMEDIR/diy-0.1
 
@@ -12,6 +9,4 @@ if ! [ -e $BASE/run/supervisord.sock ]; then
 fi
 
 export PYTHONPATH="$OPENSHIFT_DATA_DIR/pylibs/supervisor:$OPENSHIFT_DATA_DIR/pylibs/meld3:$OPENSHIFT_DATA_DIR/pylibs"
-python $OPENSHIFT_DATA_DIR/pylibs/supervisor/supervisorctl.py -c $OPENSHIFT_DATA_DIR/etc/supervisor.ini shutdown
-
-exit 0
+python $OPENSHIFT_DATA_DIR/pylibs/supervisor/supervisorctl.py -c $OPENSHIFT_DATA_DIR/etc/supervisor.ini status

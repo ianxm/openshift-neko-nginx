@@ -1,0 +1,36 @@
+[unix_http_server]
+file = ${BASE_DIR}/run/supervisord.sock
+
+[supervisord]
+logfile = ${BASE_DIR}/logs/supervisord.log
+pidfile = ${BASE_DIR}/run/supervisord.pid
+; nodaemon = true
+
+[rpcinterface:supervisor]
+supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
+
+[supervisorctl]
+serverurl = unix://${BASE_DIR}/run/supervisord.sock
+
+[fcgi-program:hello]
+command = ${BASE_DIR}/repo/www/index.fcgi
+socket = unix://${BASE_DIR}/run/hello.sock
+priority = 1
+process_name = fastcgi-%(process_num)s
+numprocs = 3
+autostart = true
+redirect_stderr = true
+stdout_logfile = ${BASE_DIR}/logs/hello-stdout.log
+stdout_logfile_maxbytes = 1MB
+stdout_logfile_backups = 5
+
+[program:nginx]
+command = ${BASE_DIR}/data/sbin/nginx -c ${BASE_DIR}/data/etc/nginx.conf -p ${BASE_DIR}
+priority = 2
+autostart = true
+redirect_stderr = true
+stdout_logfile = ${BASE_DIR}/logs/nginx-stdout.log
+stdout_logfile_maxbytes = 1MB
+stdout_logfile_backups = 5
+
+

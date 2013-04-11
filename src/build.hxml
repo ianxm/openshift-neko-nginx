@@ -1,0 +1,5 @@
+-main Hello
+-neko hello.n
+-lib hxfcgi
+-D HXFCGI
+
