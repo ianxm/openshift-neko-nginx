@@ -16,9 +16,10 @@ written in [haxe](http://haxe.org) and compiled to
 
     rhc domain create [namespace] --rhlogin [login]
 
-4. create a new application 
+4. create a new application.  it will automatically clone into a subdirectory.
 
     rhc app create [appname] --type diy-0.1 --rhlogin [login]
+    cd [appname]
 
 5. add this as an upstream repository
 
