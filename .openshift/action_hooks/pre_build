@@ -158,6 +158,21 @@ if [ ! -d $DATA/bin ]; then
     # mv openssl-1.0.1e/libcrypto.so* ../lib/
     # rm -rf openssl-1.0.1e
 
+
+    echo ""
+    echo "installing redis"
+    echo ""
+
+    cd $DATA/tmp
+    URL="https://redis.googlecode.com/files/redis-2.6.9.tar.gz"
+    curl --silent --max-time 60 --location "$URL" | tar xz
+    cd redis-2.6.9
+    make -e install PREFIX=$DATA
+    cd ..
+    rm -rf redis-2.6.9
+    mkdir $DATA/redis
+
+
     cd $DATA
     rm -rf tmp
 
@@ -173,14 +188,28 @@ echo ""
 
 cp $REPO/etc/* $BASE/data/etc
 
-INTERNAL_IP="$OPENSHIFT_INTERNAL_IP"
-WWW_PORT="8080"
+# set environment specific variables
+if [ ${OPENSHIFT_APP_UUID+x} ]; then
+    echo "configuring for production environment"
+    INTERNAL_IP="$OPENSHIFT_INTERNAL_IP"
+    WWW_PORT="8080"
+else
+    echo "configuring for test environment"
+    BASE="/home/ian/sites/openshift_nekovm"
+    INTERNAL_IP="0.0.0.0"
+fi
+
+REDIS_PORT="32323"
 
 # escape paths for use in sed
 BASE_STR=`echo "${BASE//\//\/}"`
 
 # modify them
 sed -e "s/\${BASE_DIR}/$BASE_STR/g" "$BASE/data/etc/supervisor.ini.base" > "$BASE/data/etc/supervisor.ini"
+
+sed -e "s/\${BASE_DIR}/$BASE_STR/g" \
+    -e "s/\${REDIS_PORT}/$REDIS_PORT/g" \
+    -e "s/\${INTERNAL_IP}/$INTERNAL_IP/g" "$BASE/data/etc/redis.conf.base" > "$BASE/data/etc/redis.conf"
 
 sed -e "s/\${BASE_DIR}/$BASE_STR/g" \
     -e "s/\${INTERNAL_IP}/$INTERNAL_IP/g" "$BASE/data/etc/nginx.conf.base" > "$BASE/data/etc/nginx.conf"

@@ -12,6 +12,15 @@ supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
 [supervisorctl]
 serverurl = unix://${BASE_DIR}/run/supervisord.sock
 
+[program:redis]
+command = ${BASE_DIR}/data/bin/redis-server ${BASE_DIR}/data/etc/redis.conf
+priority = 0
+autostart = true
+redirect_stderr = true
+stdout_logfile = ${BASE_DIR}/logs/redis-stdout.log
+stdout_logfile_maxbytes = 1MB
+stdout_logfile_backups = 5
+
 [fcgi-program:hello]
 command = ${BASE_DIR}/repo/www/index.fcgi
 socket = unix://${BASE_DIR}/run/hello.sock
