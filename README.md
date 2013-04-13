@@ -14,21 +14,21 @@ written in [haxe](http://haxe.org) and compiled to
 
 3. create a new domain
 
-    rhc domain create [namespace] --rhlogin [login]
+        rhc domain create [namespace] --rhlogin [login]
 
 4. create a new application.  it will automatically clone into a subdirectory.
 
-    rhc app create [appname] --type diy-0.1 --rhlogin [login]
-    cd [appname]
+        rhc app create [appname] --type diy-0.1 --rhlogin [login]
+        cd [appname]
 
 5. add this as an upstream repository
 
-    git remote add upstream -m master git://github.com/ianxm/openshift-neko-nginx
-    git pull -s recursive -X theirs upstream master
+        git remote add upstream -m master git://github.com/ianxm/openshift-neko-nginx
+        git pull -s recursive -X theirs upstream master
 
 6. push to the cloud
    
-    git push
+        git push
 
 7. wait a while.  on the first push it'll install and configure all of
    the tools it needs.  many of them are compiled from source and take
