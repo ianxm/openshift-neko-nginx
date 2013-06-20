@@ -13,7 +13,7 @@ supervisor.rpcinterface_factory = supervisor.rpcinterface:make_main_rpcinterface
 serverurl = unix://${BASE_DIR}/run/supervisord.sock
 
 [program:redis]
-command = ${BASE_DIR}/data/bin/redis-server ${BASE_DIR}/data/etc/redis.conf
+command = ${DATA_DIR}/bin/redis-server ${DATA_DIR}/etc/redis.conf
 priority = 0
 autostart = true
 redirect_stderr = true
@@ -22,7 +22,7 @@ stdout_logfile_maxbytes = 1MB
 stdout_logfile_backups = 5
 
 [fcgi-program:hello]
-command = ${BASE_DIR}/repo/www/index.fcgi
+command = ${REPO_DIR}/www/index.fcgi
 socket = unix://${BASE_DIR}/run/hello.sock
 priority = 1
 process_name = fastcgi-%(process_num)s
@@ -34,7 +34,7 @@ stdout_logfile_maxbytes = 1MB
 stdout_logfile_backups = 5
 
 [program:nginx]
-command = ${BASE_DIR}/data/sbin/nginx -c ${BASE_DIR}/data/etc/nginx.conf -p ${BASE_DIR}
+command = ${DATA_DIR}/sbin/nginx -c ${DATA_DIR}/etc/nginx.conf -p ${BASE_DIR}
 priority = 2
 autostart = true
 redirect_stderr = true

@@ -5,7 +5,9 @@
 
 echo 'starting processes'
 
-export PYTHONPATH="$OPENSHIFT_DATA_DIR/pylibs/supervisor:$OPENSHIFT_DATA_DIR/pylibs/meld3:$OPENSHIFT_DATA_DIR/pylibs"
-export LD_LIBRARY_PATH=$OPENSHIFT_DATA_DIR/lib
-python $OPENSHIFT_DATA_DIR/pylibs/supervisor/supervisord.py -c $OPENSHIFT_DATA_DIR/etc/supervisor.ini
+DATA=$OPENSHIFT_DATA_DIR
+
+export PYTHONPATH="$DATA/pylibs/supervisor:$DATA/pylibs/meld3:$DATA/pylibs"
+export LD_LIBRARY_PATH=$DATA/lib
+python $DATA/pylibs/supervisor/supervisord.py -c $DATA/etc/supervisor.ini
 

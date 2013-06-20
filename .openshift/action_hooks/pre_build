@@ -6,9 +6,10 @@
 
 set -e
 
-BASE=$OPENSHIFT_HOMEDIR/diy-0.1
-DATA=$BASE/data
-REPO=$BASE/repo
+BASE=$OPENSHIFT_DIY_DIR
+REPO=$OPENSHIFT_REPO_DIR
+DATA=$OPENSHIFT_DATA_DIR
+INTERNAL_IP="$OPENSHIFT_INTERNAL_IP"
 
 # install supervisord, nginx, nekovm the first time
 if [ ! -d $DATA/bin ]; then
@@ -186,31 +187,40 @@ echo ""
 echo "preparing config files"
 echo ""
 
-cp $REPO/etc/* $BASE/data/etc
+cp $REPO/etc/* $DATA/etc
 
 # set environment specific variables
 if [ ${OPENSHIFT_APP_UUID+x} ]; then
     echo "configuring for production environment"
-    INTERNAL_IP="$OPENSHIFT_INTERNAL_IP"
     WWW_PORT="8080"
 else
     echo "configuring for test environment"
-    BASE="/home/ian/sites/openshift_nekovm"
-    INTERNAL_IP="0.0.0.0"
 fi
 
 REDIS_PORT="32323"
 
 # escape paths for use in sed
 BASE_STR=`echo "${BASE//\//\/}"`
+REPO_STR=`echo "${REPO//\//\/}"`
+DATA_STR=`echo "${DATA//\//\/}"`
 
 # modify them
-sed -e "s/\${BASE_DIR}/$BASE_STR/g" "$BASE/data/etc/supervisor.ini.base" > "$BASE/data/etc/supervisor.ini"
+sed -e "s/\${BASE_DIR}/$BASE_STR/g" \
+    -e "s/\${REPO_DIR}/$REPO_STR/g" \
+    -e "s/\${DATA_DIR}/$DATA_STR/g" \
+       "$DATA/etc/supervisor.ini.base" > "$DATA/etc/supervisor.ini"
 
 sed -e "s/\${BASE_DIR}/$BASE_STR/g" \
+    -e "s/\${REPO_DIR}/$REPO_STR/g" \
+    -e "s/\${DATA_DIR}/$DATA_STR/g" \
     -e "s/\${REDIS_PORT}/$REDIS_PORT/g" \
-    -e "s/\${INTERNAL_IP}/$INTERNAL_IP/g" "$BASE/data/etc/redis.conf.base" > "$BASE/data/etc/redis.conf"
+    -e "s/\${INTERNAL_IP}/$INTERNAL_IP/g" \
+       "$DATA/etc/redis.conf.base" > "$DATA/etc/redis.conf"
 
 sed -e "s/\${BASE_DIR}/$BASE_STR/g" \
-    -e "s/\${INTERNAL_IP}/$INTERNAL_IP/g" "$BASE/data/etc/nginx.conf.base" > "$BASE/data/etc/nginx.conf"
+    -e "s/\${REPO_DIR}/$REPO_STR/g" \
+    -e "s/\${DATA_DIR}/$DATA_STR/g" \
+    -e "s/\${INTERNAL_IP}/$INTERNAL_IP/g" \
+       "$DATA/etc/nginx.conf.base" > "$DATA/etc/nginx.conf"
+
 
