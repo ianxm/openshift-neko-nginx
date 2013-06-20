@@ -3,7 +3,8 @@
 
 echo 'stopping processes'
 
-BASE=$OPENSHIFT_HOMEDIR/diy-0.1
+BASE=$OPENSHIFT_DIY_DIR
+DATA=$OPENSHIFT_DATA_DIR
 
 # check that supervisor is up
 if ! [ -e $BASE/run/supervisord.sock ]; then
@@ -11,7 +12,7 @@ if ! [ -e $BASE/run/supervisord.sock ]; then
     exit 0
 fi
 
-export PYTHONPATH="$OPENSHIFT_DATA_DIR/pylibs/supervisor:$OPENSHIFT_DATA_DIR/pylibs/meld3:$OPENSHIFT_DATA_DIR/pylibs"
-python $OPENSHIFT_DATA_DIR/pylibs/supervisor/supervisorctl.py -c $OPENSHIFT_DATA_DIR/etc/supervisor.ini shutdown
+export PYTHONPATH="$DATA/pylibs/supervisor:$DATA/pylibs/meld3:$DATA/pylibs"
+python $DATA/pylibs/supervisor/supervisorctl.py -c $DATA/etc/supervisor.ini shutdown
 
 exit 0

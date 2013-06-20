@@ -4,9 +4,9 @@
 # before the deploy step.  This script gets executed directly, so it
 # could be python, php, ruby, etc.
 
-BASE=$OPENSHIFT_HOMEDIR/diy-0.1
-DATA=$BASE/data
-REPO=$BASE/repo
+BASE=$OPENSHIFT_DIY_DIR
+REPO=$OPENSHIFT_REPO_DIR
+DATA=$OPENSHIFT_DATA_DIR
 
 echo ""
 echo "link the fcgi"

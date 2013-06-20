@@ -24,19 +24,19 @@ http {
         rewrite ^/hello$ /index.fcgi break;
 
         location / {
-            root   ${BASE_DIR}/repo/www;
+            root   ${REPO_DIR}/www;
             index  index.html index.fcgi;
         }
 
         # redirect server error pages to the static page /50x.html
         error_page   500 502 503 504  /error.html;
         location = /error.html {
-            root   ${BASE_DIR}/repo/www;
+            root   ${REPO_DIR}/www;
         }
 
         # make the fastcgi call
         location ~ \.fcgi$ {
-           root           ${BASE_DIR}/repo/www;
+           root           ${REPO_DIR}/www;
            fastcgi_pass   unix:${BASE_DIR}/run/hello.sock;
            fastcgi_index  index.fcgi;
            include        fastcgi_params;
@@ -44,9 +44,9 @@ http {
     }
 
     # put temp dirs in tmp
-    client_body_temp_path ${BASE_DIR}/tmp/scgi;
-    fastcgi_temp_path ${BASE_DIR}/tmp/fastcgi;
-    proxy_temp_path ${BASE_DIR}/tmp/proxy;
-    scgi_temp_path ${BASE_DIR}/tmp/scgi;
-    uwsgi_temp_path ${BASE_DIR}/tmp/wscgi;
+    client_body_temp_path ${DATA_DIR}/tmp/scgi;
+    fastcgi_temp_path ${DATA_DIR}/tmp/fastcgi;
+    proxy_temp_path ${DATA_DIR}/tmp/proxy;
+    scgi_temp_path ${DATA_DIR}/tmp/scgi;
+    uwsgi_temp_path ${DATA_DIR}/tmp/wscgi;
 }
